@@ -1,0 +1,40 @@
+.editor-with-tags {
+  box-sizing: border-box;
+  box-shadow: 0px 0px 3px #ccc;
+  height: 30px;
+  line-height: 30px;
+  background: #fff;
+  position: relative;
+}
+.editor-with-tags * {
+  box-sizing: border-box;
+}
+.editor-with-tags .input {
+  margin: 0px 4px;
+  overflow: hidden;
+  height: 100%;
+  white-space: nowrap;
+  outline: none;
+}
+.editor-with-tags.focus {
+  box-shadow: 0px 0px 4px #1414b8;
+}
+.editor-with-tags ::selection {
+  background: #f075f0;
+  color: #fff;
+}
+.editor-with-tags .menu {
+  width: 200px;
+  background: #f7f7f7;
+  position: absolute;
+  top: 100%;
+  left: 40px;
+  box-shadow: 0px 2px 4px #ccc;
+}
+.editor-with-tags .menu .option {
+  padding: 0px 4px;
+  cursor: pointer;
+}
+.editor-with-tags .menu .option:hover {
+  background: #fff;
+}

@@ -1,0 +1,40 @@
+
+.editor-with-tags
+  box-sizing border-box
+  box-shadow 0px 0px 3px hsl(0,0,80)
+  height 30px
+  line-height 30px
+  background white
+  position relative
+
+  *
+    box-sizing border-box
+
+  .input
+    margin 0px 4px
+    overflow hidden
+    height 100%
+    white-space nowrap
+    outline none
+
+  &.focus
+    box-shadow 0px 0px 4px hsl(240,80,40)
+
+  ::selection
+    background hsl(300, 80, 70)
+    color white
+
+  .menu
+    width 200px
+    background hsl(0,0,97)
+    position absolute
+    top 100%
+    left 40px
+    box-shadow 0px 2px 4px hsl(0,0,80)
+
+    .option
+      padding 0px 4px
+      cursor pointer
+
+    .option:hover
+      background hsl(0,0,100)
