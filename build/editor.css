@@ -16,6 +16,12 @@
   white-space: nowrap;
   outline: none;
 }
+.editor-with-tags .input input {
+  margin-right: 3px;
+  outline: none;
+  border: none;
+  min-width: 0px;
+}
 .editor-with-tags.focus {
   box-shadow: 0px 0px 4px #1414b8;
 }
@@ -30,6 +36,7 @@
   top: 100%;
   left: 40px;
   box-shadow: 0px 2px 4px #ccc;
+  display: none;
 }
 .editor-with-tags .menu .option {
   padding: 0px 4px;
