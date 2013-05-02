@@ -17,11 +17,18 @@
     white-space nowrap
     outline none
 
-    input
-      margin-right 3px
-      outline none
-      border none
-      min-width 0px
+    .tag
+      background hsl(240,70,93)
+      margin 0px 3px
+      padding 0px 5px
+      border-radius 2px
+
+      .close
+        margin-left 4px
+        font-size 13px
+        color hsl(0,0,40)
+        text-shadow 0px 0px 2px hsl(0,0,0)
+        cursor pointer
 
   &.focus
     box-shadow 0px 0px 4px hsl(240,80,40)
@@ -45,3 +52,13 @@
 
     .option:hover
       background hsl(0,0,100)
+
+    .option.selected
+      background white
+      box-shadow 0px 0px 5px hsl(0,0,80)
+
+    &:hover
+      .option
+        background none
+      .option:hover
+        background white

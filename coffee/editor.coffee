@@ -34,7 +34,7 @@ EditorWithTags:: =
     @elem.on "keyup", ".input", (event) => @onkeyup event
     @elem.on "click", ".input", (event) =>
       elem = $(event.target)
-      console.log "the elem to focus", elem
+      # console.log "the elem to focus", elem
       elem[0].focus()
 
   focus: ->
@@ -51,13 +51,16 @@ EditorWithTags:: =
         when 13 then @hitEnter event
         when 38 then @hitUp event
         when 40 then @hitDown event
-      # event.preventDefault()
-      # return off
+      event.preventDefault()
+      return off
 
     @events.emit "keydown", event
 
   onkeyup: (event) ->
     @events.emit "keyup", event
+    if event.keyCode in [13, 38, 40]
+      event.preventDefault()
+      return off
     @getOffsetLeft()
 
   textSpan: -> $("<span>").attr("contenteditable", yes).text("@")
@@ -66,9 +69,15 @@ EditorWithTags:: =
   keyup: (callback) ->
     @events.on "keyup", callback
 
-  hitEnter: (event) -> console.log event
-  hitUp: (event) -> console.log event
-  hitDown: (event) -> console.log event
+  hitEnter: (event) ->
+    if @hasMenu then @selectOption()
+    console.log event
+  hitUp: (event) ->
+    if @hasMenu then @selectLast()
+    console.log event
+  hitDown: (event) ->
+    if @hasMenu then @selectNext()
+    console.log event
 
   replaceHTML: (html) -> @input.html html
   getHTML: -> @input.html()
@@ -84,7 +93,7 @@ EditorWithTags:: =
 
     before = text[...start]
     after = text[start..]
-    console.log "so got:", "####{before}##{after}###"
+    # console.log "so got:", "####{before}##{after}###"
 
     suggests = @read before
     if suggests.length > 0
@@ -93,11 +102,12 @@ EditorWithTags:: =
       cursor = @elem.find("#cursor")
       node.data = before
       
-      console.log "positioning", "####{before}##{after}###"
+      # console.log "positioning", "####{before}##{after}###"
       @position = cursor.position(@elem)
       @drawMenu suggests
       @dropMenu()
       @moveMenu() if @piece is ""
+      @selectNext()
       
       cursor.remove()
       node.data = text
@@ -130,7 +140,9 @@ EditorWithTags:: =
 
   optionHTML: (text) -> "<div class='option'>#{text}</div>"
 
-  drawMenu: (list) -> @menu.html list.map(@optionHTML).join("")
+  drawMenu: (list) ->
+    @menu.html list.map(@optionHTML).join("")
+    console.log "drawing"
 
   suggest: (map) ->
     @suggest = map
@@ -153,3 +165,48 @@ EditorWithTags:: =
 
     @currentKey = ""
     return []
+
+  selectClass: (elem) ->
+    @elem.find(".selected").removeClass "selected"
+    elem.addClass "selected"
+
+  selectNext: ->
+    menu = @elem.find(".menu")
+    selected = menu.find(".selected")
+    if selected.length > 0
+      next = selected.next()
+      if next.length > 0
+        @selectClass next
+        return
+
+    @selectClass menu.children().first()
+
+  selectLast: ->
+    menu = @elem.find(".menu")
+    selected = menu.find(".selected")
+    if selected.length > 0
+      last = selected.prev()
+      if last.length > 0
+        @selectClass last
+        return
+    
+    @selectClass menu.children().last()
+
+  selectOption: (elem) ->
+    elem = @elem.find(".selected") unless elem?
+    text = elem.text()
+    @insertTag key: @currentKey, value: text
+    @foldMenu()
+
+  insertTag: (data) ->
+    range = document.getSelection().getRangeAt(0)
+    node = range.startContainer
+    $(node).after (@makeTag data)
+
+  makeTag: (data) ->
+    close = "<span class='close'>x</span>"
+    $("<span key='#{data.key}' class='tag'>#{data.value}#{close}</span>")
+
+  test: ->
+    @elem.find(".input").append @makeTag key: "@", value: "value"
+    @elem.find(".input").append @makeTag key: "@", value: "value 2"

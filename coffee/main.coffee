@@ -21,5 +21,5 @@ $ ->
 
   console.log demo instanceof EditorWithTags
 
-  f = ->
-    console.log "a"
+  demo.elem.find(".input").click()
+  demo.test()

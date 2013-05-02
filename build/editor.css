@@ -16,11 +16,18 @@
   white-space: nowrap;
   outline: none;
 }
-.editor-with-tags .input input {
-  margin-right: 3px;
-  outline: none;
-  border: none;
-  min-width: 0px;
+.editor-with-tags .input .tag {
+  background: #e1e1fa;
+  margin: 0px 3px;
+  padding: 0px 5px;
+  border-radius: 2px;
+}
+.editor-with-tags .input .tag .close {
+  margin-left: 4px;
+  font-size: 13px;
+  color: #666;
+  text-shadow: 0px 0px 2px #000;
+  cursor: pointer;
 }
 .editor-with-tags.focus {
   box-shadow: 0px 0px 4px #1414b8;
@@ -43,5 +50,15 @@
   cursor: pointer;
 }
 .editor-with-tags .menu .option:hover {
+  background: #fff;
+}
+.editor-with-tags .menu .option.selected {
+  background: #fff;
+  box-shadow: 0px 0px 5px #ccc;
+}
+.editor-with-tags .menu:hover .option {
+  background: none;
+}
+.editor-with-tags .menu:hover .option:hover {
   background: #fff;
 }
