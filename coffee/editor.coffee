@@ -7,6 +7,9 @@ EditorWithTags = (options) ->
   @menu = $("<div>").addClass("menu")
   @elem.append @input, @menu
 
+  @elem.find(".input").append($(document.createTextNode("")))
+  @elem.find(".input").append("<br>")
+
   @setupEvents()
   return
 
@@ -122,6 +125,27 @@ EditorWithTags:: =
     else
       @foldMenu()
 
+  insertTag: (data) ->
+    range = document.getSelection().getRangeAt(0)
+    node = range.startContainer
+    text = node.textContent
+    start = range.startOffset
+    # end = range.endOffset
+    before = text[...start]
+    after = text[start..]
+    node.data = before[...-1] 
+    newText = $(document.createTextNode("x"))
+    $(node).after(newText)
+    $(node).after (@makeTag data)
+    newText[0].textContent = after + ""
+
+    newRange = document.createRange()
+    newRange.setStart newText[0], 0
+    newRange.collapse = yes
+    sel = document.getSelection()
+    sel.removeAllRanges()
+    sel.addRange newRange
+
   hasMenu: no
 
   dropMenu: ->
@@ -198,15 +222,12 @@ EditorWithTags:: =
     @insertTag key: @currentKey, value: text
     @foldMenu()
 
-  insertTag: (data) ->
-    range = document.getSelection().getRangeAt(0)
-    node = range.startContainer
-    $(node).after (@makeTag data)
-
   makeTag: (data) ->
     close = "<span class='close'>x</span>"
-    $("<span key='#{data.key}' class='tag'>#{data.value}#{close}</span>")
+    $("<span key='#{data.key}'
+      class='tag' contenteditable='false'
+        >#{data.value}#{close}</span>")
 
   test: ->
-    @elem.find(".input").append @makeTag key: "@", value: "value"
-    @elem.find(".input").append @makeTag key: "@", value: "value 2"
+    @elem.find(".input").prepend @makeTag key: "@", value: " value "
+    @elem.find(".input").prepend @makeTag key: "@", value: " value 2 "
