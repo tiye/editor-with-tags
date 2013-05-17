@@ -1,20 +1,16 @@
 
-EditorWithTags = (options) ->
-  @options = options
+class EditorWithTags
+  constructor: (options) ->
+    @options = options
 
-  @elem = $("<div>").addClass "editor-with-tags"
-  @input = $("<div>").addClass("input").attr "contenteditable", yes
-  @menu = $("<div>").addClass("menu")
-  @elem.append @input, @menu
+    @elem = $("<div>").addClass "editor-with-tags"
+    @input = $("<div>").addClass("input").attr "contenteditable", yes
+    @menu = $("<div>").addClass("menu")
+    @elem.append @input, @menu
 
-  @elem.find(".input").append($(document.createTextNode("")))
-  @elem.find(".input").append("<br>")
+    @elem.find(".input").append($(document.createTextNode("")))
 
-  @setupEvents()
-  return
-
-EditorWithTags:: =
-  contructor: EditorWithTags
+    @setupEvents()
 
   text: (value) ->
     # @elem.find(".input").text value
@@ -137,6 +133,7 @@ EditorWithTags:: =
     newText = $(document.createTextNode("x"))
     $(node).after(newText)
     $(node).after (@makeTag data)
+    $(node).next().after document.createTextNode(" ")
     newText[0].textContent = after + ""
 
     newRange = document.createRange()
@@ -224,9 +221,7 @@ EditorWithTags:: =
 
   makeTag: (data) ->
     close = "<span class='close'>x</span>"
-    $("<span key='#{data.key}'
-      class='tag' contenteditable='false'
-        >#{data.value}#{close}</span>")
+    $("<a key='#{data.key}' class='tag' contenteditable='false'>#{data.value} #{}</a>")
 
   test: ->
     @elem.find(".input").prepend @makeTag key: "@", value: " value "

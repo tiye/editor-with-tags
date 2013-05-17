@@ -22,4 +22,4 @@ $ ->
   console.log demo instanceof EditorWithTags
 
   demo.elem.find(".input").click()
-  demo.test()
+  # demo.test()
