@@ -12,38 +12,49 @@ class EditorWithTags
 
     @setupEvents()
 
-  text: (value) ->
+  text: (value) =>
     # @elem.find(".input").text value
 
-  delay: (t, f) -> setTimeout (=> f()), t
+  delay: (t, f) => setTimeout (=> f()), t
 
   position:
     left: 0
 
-  editable: (elem) ->
+  editable: (elem) =>
     elem.attr "contenteditable", yes
 
-  setupEvents: ->
+  setupEvents: =>
 
     @events = new EventEmitter
 
-    @elem.on "focus", ".input", (event) => @focus event
-    @elem.on "blur", ".input", (event) => @blur event
-    @elem.on "keydown", ".input", (event) => @onkeydown event
-    @elem.on "keyup", ".input", (event) => @onkeyup event
-    @elem.on "click", ".input", (event) =>
-      elem = $(event.target)
-      # console.log "the elem to focus", elem
-      elem[0].focus()
+    @elem.on "focus", ".input", @focus
+    @elem.on "blur", ".input", @blur
+    @elem.on "keydown", ".input", @onkeydown
+    @elem.on "keyup", ".input", @onkeyup
+    @elem.on "click", @clickOnComponent
+    @elem.on "click", ".option", @selectClicked
+    @elem.on "click", ".tag", @clickOnTag
+    $(document).on "click", @loseFocus
+    $(document).on "blur", @loseFocus
 
-  focus: ->
+  focus: =>
     console.log "focus"
     @elem.addClass "focus"
+    @delay 0, =>
+      # let it focus first, and bind @ here
+      @getOffsetLeft()
 
-  blur: ->
+  blur: =>
     @elem.removeClass "focus"
 
-  onkeydown: (event) ->
+  clickOnComponent: (event) =>
+    event.stopPropagation()
+    off
+
+  loseFocus: (event) =>
+    @foldMenu()
+
+  onkeydown: (event) =>
     # console.log "keydown event", event.keyCode
     if event.keyCode in [13, 38, 40]
       switch event.keyCode
@@ -55,33 +66,34 @@ class EditorWithTags
 
     @events.emit "keydown", event
 
-  onkeyup: (event) ->
+  onkeyup: (event) =>
     @events.emit "keyup", event
     if event.keyCode in [13, 38, 40]
       event.preventDefault()
       return off
     @getOffsetLeft()
 
-  textSpan: -> $("<span>").attr("contenteditable", yes).text("@")
+  textSpan: => $("<span>").attr("contenteditable", yes).text("@")
 
-  keydown: (callback) -> @events.on "keydown", callback
-  keyup: (callback) ->
+  keydown: (callback) => @events.on "keydown", callback
+  keyup: (callback) =>
     @events.on "keyup", callback
 
-  hitEnter: (event) ->
+  hitEnter: (event) =>
     if @hasMenu then @selectOption()
     console.log event
-  hitUp: (event) ->
+  hitUp: (event) =>
     if @hasMenu then @selectLast()
     console.log event
-  hitDown: (event) ->
+  hitDown: (event) =>
     if @hasMenu then @selectNext()
     console.log event
 
-  replaceHTML: (html) -> @input.html html
-  getHTML: -> @input.html()
+  replaceHTML: (html) => @input.html html
+  getHTML: => @input.html()
 
-  getOffsetLeft: ->
+  # this means we are seeing if we need to drop the menu
+  getOffsetLeft: =>
     range = document.getSelection().getRangeAt(0)
     return null unless range.collapsed
     node = range.commonAncestorContainer
@@ -92,7 +104,7 @@ class EditorWithTags
 
     before = text[...start]
     after = text[start..]
-    # console.log "so got:", "####{before}##{after}###"
+    console.log "so got:", "####{before}##{after}###"
 
     suggests = @read before
     if suggests.length > 0
@@ -111,17 +123,12 @@ class EditorWithTags
       cursor.remove()
       node.data = text
 
-      newRange = document.createRange()
-      newRange.setStart node, start
-      newRange.collapse yes
-      sel = document.getSelection()
-      sel.removeAllRanges()
-      sel.addRange newRange
+      @caretGoto node, start
 
     else
       @foldMenu()
 
-  insertTag: (data) ->
+  insertTag: (data) =>
     range = document.getSelection().getRangeAt(0)
     node = range.startContainer
     text = node.textContent
@@ -136,39 +143,34 @@ class EditorWithTags
     $(node).next().after document.createTextNode(" ")
     newText[0].textContent = after + ""
 
-    newRange = document.createRange()
-    newRange.setStart newText[0], 0
-    newRange.collapse = yes
-    sel = document.getSelection()
-    sel.removeAllRanges()
-    sel.addRange newRange
+    @caretGoto newText[0], 0
 
   hasMenu: no
 
-  dropMenu: ->
+  dropMenu: =>
     unless @hasMenu
       console.log "drop"
       @hasMenu = yes
       @elem.find(".menu").slideDown()
 
-  foldMenu: ->
+  foldMenu: =>
     if @hasMenu
       @hasMenu = no
       @elem.find(".menu").slideUp()
 
-  moveMenu: ->
+  moveMenu: =>
     @elem.find(".menu").css "left", "#{@position.left}px"
 
   optionHTML: (text) -> "<div class='option'>#{text}</div>"
 
-  drawMenu: (list) ->
+  drawMenu: (list) =>
     @menu.html list.map(@optionHTML).join("")
     console.log "drawing"
 
-  suggest: (map) ->
+  loadSuggest: (map) =>
     @suggest = map
 
-  read: (before) ->
+  read: (before) =>
     keys = Object.keys @suggest
     for key in keys
       key = key[0]
@@ -187,11 +189,11 @@ class EditorWithTags
     @currentKey = ""
     return []
 
-  selectClass: (elem) ->
+  selectClass: (elem) =>
     @elem.find(".selected").removeClass "selected"
     elem.addClass "selected"
 
-  selectNext: ->
+  selectNext: =>
     menu = @elem.find(".menu")
     selected = menu.find(".selected")
     if selected.length > 0
@@ -202,7 +204,7 @@ class EditorWithTags
 
     @selectClass menu.children().first()
 
-  selectLast: ->
+  selectLast: =>
     menu = @elem.find(".menu")
     selected = menu.find(".selected")
     if selected.length > 0
@@ -213,15 +215,37 @@ class EditorWithTags
     
     @selectClass menu.children().last()
 
-  selectOption: (elem) ->
+  selectOption: (elem) =>
     elem = @elem.find(".selected") unless elem?
     text = elem.text()
     @insertTag key: @currentKey, value: text
     @foldMenu()
 
+  selectClicked: (event) =>
+    @selectOption ($ event.target)
+
   makeTag: (data) ->
     close = "<span class='close'>x</span>"
     $("<a key='#{data.key}' class='tag' contenteditable='false'>#{data.value} #{}</a>")
+
+  clickOnTag: (event) =>
+    currentTag = $ event.target
+    text = currentTag.nextSibling
+    if not text?
+      text = document.createTextNode("")
+      currentTag.after text
+    @caretGoto text, 0
+    event.stopPropagation()
+    off
+
+  caretGoto: (elem, start=0) =>
+    if window.getSelection?
+      range = document.createRange()
+      range.setStart elem, start
+      range.collapse yes
+      selection = window.getSelection()
+      selection.removeAllRanges()
+      selection.addRange range
 
   test: ->
     @elem.find(".input").prepend @makeTag key: "@", value: " value "

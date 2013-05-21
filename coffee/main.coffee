@@ -7,8 +7,8 @@ duplicate = (string , times) ->
 $ ->
   console.log "started"
 
-  demo = new EditorWithTags
-  demo.suggest
+  window.demo = demo = new EditorWithTags
+  demo.loadSuggest
     "@": ["today", "torrow", "next week", "昨天", "今天", "明天"]
     "^": ["list a", "list b", "列表3", "列表 4"]
 
