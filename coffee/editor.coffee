@@ -12,8 +12,15 @@ class EditorWithTags
 
     @setupEvents()
 
-  text: (value) =>
-    # @elem.find(".input").text value
+    @piece = ""
+    @range = undefined
+
+  text: (text) =>
+    if text?
+      @elem.find(".input").text text
+      @
+    else
+      @elem.find(".input").text()
 
   delay: (t, f) => setTimeout (=> f()), t
 
@@ -94,7 +101,7 @@ class EditorWithTags
 
   # this means we are seeing if we need to drop the menu
   getOffsetLeft: =>
-    range = document.getSelection().getRangeAt(0)
+    @range = range = document.getSelection().getRangeAt(0)
     return null unless range.collapsed
     node = range.commonAncestorContainer
     text = node.data
@@ -129,14 +136,15 @@ class EditorWithTags
       @foldMenu()
 
   insertTag: (data) =>
-    range = document.getSelection().getRangeAt(0)
+    range = @range
     node = range.startContainer
     text = node.textContent
     start = range.startOffset
     # end = range.endOffset
     before = text[...start]
     after = text[start..]
-    node.data = before[...-1] 
+    console.log "piece", @piece
+    node.data = before[...-(@piece.length + 1)] 
     newText = $(document.createTextNode("x"))
     $(node).after(newText)
     $(node).after (@makeTag data)
@@ -222,7 +230,10 @@ class EditorWithTags
     @foldMenu()
 
   selectClicked: (event) =>
+    event.stopPropagation()
+    console.log "event", event
     @selectOption ($ event.target)
+    off
 
   makeTag: (data) ->
     close = "<span class='close'>x</span>"
@@ -238,11 +249,14 @@ class EditorWithTags
     event.stopPropagation()
     off
 
-  caretGoto: (elem, start=0) =>
+  caretGoto: (elem, start) =>
     if window.getSelection?
       range = document.createRange()
-      range.setStart elem, start
-      range.collapse yes
+      if start?
+        range.setStart elem, start
+        range.collapse yes
+      else
+        range.collapse false
       selection = window.getSelection()
       selection.removeAllRanges()
       selection.addRange range
