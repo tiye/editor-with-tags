@@ -39,7 +39,7 @@ class EditorWithTags
       elem = $ tags[index]
       key = elem.attr "key"
       value = elem.text().trim()
-      ret[key] = value
+      ret.tags[key] = value
 
     @elem.find(".input").html("")
 
@@ -126,11 +126,17 @@ class EditorWithTags
 
   # this means we are seeing if we need to drop the menu
   getOffsetLeft: =>
-    @range = range = document.getSelection().getRangeAt(0)
+    range = document.getSelection().getRangeAt(0)
+    console.log "at getOffsetLeft", range.startOffset
     return null unless range.collapsed
+    if not range.collapsed
+      @foldMenu()
+      return null
     node = range.commonAncestorContainer
     text = node.data
-    return null unless text?
+    if not text?
+      @foldMenu()
+      return null
     start = range.startOffset
     end = range.endOffset
 
@@ -140,6 +146,8 @@ class EditorWithTags
 
     suggests = @read before
     if suggests.length > 0
+      @range = range
+      range.start = range.startOffset
 
       $(node).after "<span id='cursor'></span>"
       cursor = @elem.find("#cursor")
@@ -164,7 +172,7 @@ class EditorWithTags
     range = @range
     node = range.startContainer
     text = node.textContent
-    start = range.startOffset
+    start = range.start
     # end = range.endOffset
     before = text[...start]
     after = text[start..]
@@ -184,12 +192,12 @@ class EditorWithTags
     unless @hasMenu
       console.log "drop"
       @hasMenu = yes
-      @elem.find(".menu").slideDown()
+      @elem.find(".menu").show()
 
   foldMenu: =>
     if @hasMenu
       @hasMenu = no
-      @elem.find(".menu").slideUp()
+      @elem.find(".menu").hide()
 
   moveMenu: =>
     @elem.find(".menu").css "left", "#{@position.left}px"
