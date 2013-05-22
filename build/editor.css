@@ -14,6 +14,9 @@
   height: 100%;
   white-space: nowrap;
   outline: none;
+  position: absolute;
+  top: 0px;
+  width: 100%;
 }
 .editor-with-tags .input .tag {
   color: #a8aeeb;
@@ -25,6 +28,21 @@
   color: #666;
   text-shadow: 0px 0px 2px #000;
   cursor: pointer;
+}
+.editor-with-tags .placeholder {
+  position: absolute;
+  top: 0px;
+  padding: 0px 6px;
+  width: 100%;
+  height: 100%;
+  color: #ccc;
+}
+.editor-with-tags .placeholder .icon {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  height: 100%;
+  width: 20px;
 }
 .editor-with-tags.focus {
   box-shadow: 0px 0px 4px #1414b8;

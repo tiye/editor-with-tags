@@ -4,6 +4,9 @@ class EditorWithTags
     @options = options
 
     @elem = $("<div>").addClass "editor-with-tags"
+    @elem.append $("<div>").addClass("placeholder")
+    @elem.find(".placeholder").append $("<span>"), $("<div>").addClass("icon")
+    @elem.find(".icon").append $("<img>")
     @input = $("<div>").addClass("input").attr "contenteditable", yes
     @menu = $("<div>").addClass("menu")
     @elem.append @input, @menu
@@ -14,6 +17,7 @@ class EditorWithTags
 
     @piece = ""
     @range = undefined
+    @placeholderText = ""
 
   text: (text) =>
     if text?
@@ -21,6 +25,25 @@ class EditorWithTags
       @
     else
       @elem.find(".input").text()
+
+  takeValue: =>
+    tags = @elem.find("a")
+    tags.remove()
+    text = @elem.find(".input").text().replace /\s+/g, " "
+
+    ret =
+      text: text
+      tags: {}
+
+    for index in [0...tags.length]
+      elem = $ tags[index]
+      key = elem.attr "key"
+      value = elem.text().trim()
+      ret[key] = value
+
+    @elem.find(".input").html("")
+
+    ret
 
   delay: (t, f) => setTimeout (=> f()), t
 
@@ -62,16 +85,17 @@ class EditorWithTags
     @foldMenu()
 
   onkeydown: (event) =>
-    # console.log "keydown event", event.keyCode
-    if event.keyCode in [13, 38, 40]
-      switch event.keyCode
-        when 13 then @hitEnter event
-        when 38 then @hitUp event
-        when 40 then @hitDown event
-      event.preventDefault()
-      return off
-
-    @events.emit "keydown", event
+    console.log @hasMenu, "keydown event", event.keyCode
+    if @hasMenu
+      if event.keyCode in [13, 38, 40]
+        switch event.keyCode
+          when 13 then @hitEnter event
+          when 38 then @hitUp event
+          when 40 then @hitDown event
+        event.preventDefault()
+        off
+    else
+      @events.emit "keydown", event
 
   onkeyup: (event) =>
     @events.emit "keyup", event
@@ -79,6 +103,7 @@ class EditorWithTags
       event.preventDefault()
       return off
     @getOffsetLeft()
+    @maintainPlaceholder()
 
   textSpan: => $("<span>").attr("contenteditable", yes).text("@")
 
@@ -260,6 +285,20 @@ class EditorWithTags
       selection = window.getSelection()
       selection.removeAllRanges()
       selection.addRange range
+
+  placeholder: (text) ->
+    @placeholderText = text
+    @maintainPlaceholder()
+
+  maintainPlaceholder: ->
+    console.log "maintain", @elem.find(".input").text().length
+    if @elem.find(".input").text().length > 0
+      @elem.find(".placeholder span").text ""
+    else
+      @elem.find(".placeholder span").text @placeholderText
+
+  setIcon: (url) ->
+    @elem.find(".icon img").attr "src", url
 
   test: ->
     @elem.find(".input").prepend @makeTag key: "@", value: " value "

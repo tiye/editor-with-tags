@@ -23,3 +23,12 @@ $ ->
 
   demo.elem.find(".input").click()
   # demo.test()
+
+  demo.placeholder "demo of placeholder"
+  demo.setIcon "http://cdn1.iconfinder.com/data/icons/iconic/raster/12/arrow_down.png"
+
+  demo.keydown (event) ->
+    if event.keyCode is 13
+      console.log demo.takeValue()
+      event.preventDefault()
+      off
